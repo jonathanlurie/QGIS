@@ -627,8 +627,8 @@ QPointF QgsModelComponentGraphicItem::linkPoint( Qt::Edge edge, int index, bool 
         const QFontMetricsF fm( mFont );
         const double w = fm.boundingRect( text ).width();
         const double h = fm.height() * 1.2 * ( pointIndex + 1 ) + fm.height() / 2.0;
-        const double y = h + itemSize().height() / 2.0 + 5;
-        const double x = !mComponent->linksCollapsed( Qt::BottomEdge ) ? ( -itemSize().width() / 2 + 33 + w + 5 ) : 10;
+        const double y = h + itemSize().height() / 2.0 + 6;
+        const double x = !mComponent->linksCollapsed( Qt::BottomEdge ) ? ( -itemSize().width() / 2 + 33 + w + 10 ) : 10;
         return QPointF( incoming ? -itemSize().width() / 2 + offsetX : x, y );
       }
       break;
@@ -1068,7 +1068,12 @@ int QgsModelChildAlgorithmGraphicItem::linkPointCount( Qt::Edge edge ) const
     switch ( edge )
     {
       case Qt::BottomEdge:
+      {
+        auto a = child->algorithm()->outputDefinitions();
+        auto b = a.at(0);
+        b->type();
         return child->algorithm()->outputDefinitions().size();
+      }
       case Qt::TopEdge:
       {
         QgsProcessingParameterDefinitions params = child->algorithm()->parameterDefinitions();
@@ -1076,6 +1081,7 @@ int QgsModelChildAlgorithmGraphicItem::linkPointCount( Qt::Edge edge ) const
                         return param->flags() & Qgis::ProcessingParameterFlag::Hidden || param->isDestination();
                       } ),
                       params.end() );
+
         return params.size();
       }
 
@@ -1086,6 +1092,48 @@ int QgsModelChildAlgorithmGraphicItem::linkPointCount( Qt::Edge edge ) const
   }
   return 0;
 }
+
+
+QString QgsModelComponentGraphicItem::getLinkedParamDataType(Qt::Edge edge, int index)
+{
+  QString unknownType = QString("unknown");
+
+if ( const QgsProcessingModelChildAlgorithm *child = dynamic_cast<const QgsProcessingModelChildAlgorithm *>( component() ) )
+  {
+    if ( !child->algorithm() ) {
+      return unknownType;
+    }
+
+    switch ( edge )
+    {
+      case Qt::BottomEdge:
+      {
+        if (index <= child->algorithm()->outputDefinitions().size() - 1) {
+          return child->algorithm()->outputDefinitions().at(index)->type();
+        }
+        return unknownType;
+      }
+      case Qt::TopEdge:
+      {
+        QgsProcessingParameterDefinitions params = child->algorithm()->parameterDefinitions();
+
+        if (index <= params.size() - 1) {
+          return params.at(index)->type();
+        }
+
+        return unknownType;
+      }
+
+      case Qt::LeftEdge:
+      case Qt::RightEdge:
+        break;
+    }
+  }
+
+  return unknownType;
+}
+
+
 
 QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int index ) const
 {

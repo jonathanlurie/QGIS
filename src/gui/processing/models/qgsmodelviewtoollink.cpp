@@ -24,6 +24,8 @@
 #include "qgsmodelviewmouseevent.h"
 #include "qgsmodelgraphicsview.h"
 #include <QScrollBar>
+#include <iostream>
+#include <qgslogger.h>
 
 QgsModelViewToolLink::QgsModelViewToolLink( QgsModelGraphicsView *view )
   : QgsModelViewTool( view, tr( "Link Tool" ) )
@@ -39,6 +41,8 @@ QgsModelViewToolLink::QgsModelViewToolLink( QgsModelGraphicsView *view )
 
 void QgsModelViewToolLink::modelMoveEvent( QgsModelViewMouseEvent *event )
 {
+  QgsDebugMsgLevel( QStringLiteral( "DEBUG 01" ), 2 );
+
   mBezierRubberBand->update( event->modelPoint(), Qt::KeyboardModifiers() );
 
   // we need to manually pass this event down to items we want it to go to -- QGraphicsScene doesn't propagate
@@ -117,7 +121,7 @@ void QgsModelViewToolLink::modelReleaseEvent( QgsModelViewMouseEvent *event )
    * whether the user dragged :
    *    - From an input socket to an output socket
    *    - From an output socket to an input socket
-   * 
+   *
    * In the code, we always come back to the first case
    */
   if ( !mToSocket->isInput() )
