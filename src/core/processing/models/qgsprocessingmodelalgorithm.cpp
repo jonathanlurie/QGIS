@@ -437,6 +437,9 @@ QVariantMap QgsProcessingModelAlgorithm::processAlgorithm( const QVariantMap &pa
 
       const QVariantMap thisChildParams = QgsProcessingUtils::removePointerValuesFromMap( childParams );
       childInputs.insert( childId, thisChildParams );
+
+      // qDebug() << "DEBUG thisChildParams" << thisChildParams.values() ;
+
       childResult.setInputs( thisChildParams );
 
       QStringList params;

@@ -990,6 +990,10 @@ void QgsModelDesignerDialog::runFromChild( const QString &id )
 
 void QgsModelDesignerDialog::run( const QSet<QString> &childAlgorithmSubset )
 {
+
+  qDebug() << "-------------------------------- DEBUG 04";
+
+
   QStringList errors;
   const bool isValid = model()->validate( errors );
   if ( !isValid )

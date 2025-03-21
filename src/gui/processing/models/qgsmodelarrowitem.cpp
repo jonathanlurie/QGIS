@@ -92,7 +92,7 @@ void QgsModelArrowItem::paint( QPainter *painter, const QStyleOptionGraphicsItem
   switch ( mStartMarker )
   {
     case Marker::Circle:
-      // painter->drawEllipse( mStartPoint, 3.0, 3.0 );
+      painter->drawEllipse( mStartPoint, 3.0, 3.0 );
       break;
     case Marker::ArrowHead:
       drawArrowHead( painter, mStartPoint, path().pointAtPercent( 0.0 ) - path().pointAtPercent( 0.05 ) );

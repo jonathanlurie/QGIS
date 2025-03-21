@@ -623,6 +623,8 @@ QPointF QgsModelComponentGraphicItem::linkPoint( Qt::Edge edge, int index, bool 
           offsetX = 17;
         }
         const int pointIndex = !mComponent->linksCollapsed( Qt::BottomEdge ) ? index : -1;
+
+        // const QString text = truncatedTextForItem( QString("hello") );
         const QString text = truncatedTextForItem( linkPointText( Qt::BottomEdge, index ) );
         const QFontMetricsF fm( mFont );
         const double w = fm.boundingRect( text ).width();
@@ -1147,6 +1149,10 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
 
     const QVariantMap inputs = mResults.inputs();
     const QVariantMap outputs = mResults.outputs();
+
+    qDebug() << "inputs.size():" << inputs.size();
+
+
     switch ( edge )
     {
       case Qt::BottomEdge:
@@ -1165,8 +1171,11 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
         QString title = output->description();
         if ( outputs.contains( output->name() ) )
         {
-          title += QStringLiteral( ": %1" ).arg( outputs.value( output->name() ).toString() );
+          title += QStringLiteral( "::: %1" ).arg( outputs.value( output->name() ).toString() );
         }
+
+        qDebug() << "Title (out):" << title;
+        // return truncatedTextForItem( QString("hello2") );
         return truncatedTextForItem( title );
       }
 
@@ -1189,9 +1198,27 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
         }
 
         QString title = params.at( index )->description();
-        if ( !inputs.value( params.at( index )->name() ).toString().isEmpty() )
-          title += QStringLiteral( ": %1" ).arg( inputs.value( params.at( index )->name() ).toString() );
+
+        ;
+
+
+
+        QString inputValueStr = inputs.value( params.at( index )->name() ).toString();
+
+        if ( !inputValueStr.isEmpty() ){
+          title += QStringLiteral( "::::: %1" ).arg( inputValueStr );
+        }
+
+
+
+
+
+        // qDebug() << "---- child->parameterSources().value(params.at( index )->name());   "<< child->parameterSources().value(params.at( index )->name());
+
+        qDebug() << "Title (in):" << title;
+
         return truncatedTextForItem( title );
+        // return truncatedTextForItem( QString("hello3") );
       }
 
       case Qt::LeftEdge:
@@ -1220,8 +1247,11 @@ bool QgsModelChildAlgorithmGraphicItem::canDeleteComponent()
   return false;
 }
 
-void QgsModelChildAlgorithmGraphicItem::setResults( const QgsProcessingModelChildAlgorithmResult &results )
+void QgsModelChildAlgorithmGraphicItem::setResults( const QgsProcessingModelChildAlgorithmResult &results)
 {
+
+  qDebug() << "------- setResults " ;
+
   if ( mResults == results )
     return;
 

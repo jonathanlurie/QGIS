@@ -66,6 +66,7 @@ bool QgsProcessingAlgRunnerTask::run()
   bool ok = false;
   try
   {
+    qDebug() << "____________________________>> DEBUG03";
     mResults = mAlgorithm->runPrepared( mParameters, mContext, mFeedback );
     ok = true;
   }
