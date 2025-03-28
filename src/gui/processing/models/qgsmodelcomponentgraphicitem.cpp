@@ -1168,7 +1168,10 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
         }
 
         const QgsProcessingOutputDefinition *output = child->algorithm()->outputDefinitions().at( index );
-        QString title = output->description();
+        QString name = output->name();
+        QString title = output->description() + "  " + name;
+
+
         if ( outputs.contains( output->name() ) )
         {
           title += QStringLiteral( "::: %1" ).arg( outputs.value( output->name() ).toString() );
@@ -1197,17 +1200,49 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
           return QString();
         }
 
-        QString title = params.at( index )->description();
+        const QgsProcessingParameterDefinition* param = params.at( index );
+        QString name = param->name();
+        QString title = param->description();
 
-        ;
+
+        auto paramSources = child->parameterSources().value(name);
+        if (paramSources.size() > 0) {
+          QVariant paramValue = paramSources[0].staticValue();
+          // param->valueAsString(paramValue, );
+
+          QString paramValueAsStr = paramValue.toString();
+          QString paramDefaultValueAsStr = param->defaultValue().toString();
+
+
+          if (param->type() == QgsProcessingParameterEnum::typeName()) {
+
+            const QgsProcessingParameterEnum* paramAsEnumParam = dynamic_cast<const QgsProcessingParameterEnum *>(param);
+            paramValueAsStr = paramAsEnumParam->options().at(paramValue.toInt());
+
+            paramDefaultValueAsStr = paramAsEnumParam->options().at(param->defaultValue().toInt());
+          }
 
 
 
-        QString inputValueStr = inputs.value( params.at( index )->name() ).toString();
 
-        if ( !inputValueStr.isEmpty() ){
-          title += QStringLiteral( "::::: %1" ).arg( inputValueStr );
+
+          // That's exactely the same result as above, but already as a string, which could be inconvenient, in case of enum value lookup
+          // QString paramValueBis = paramSources[0].friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()));
+
+
+          title += QStringLiteral( ": %1 (%2) [default: %3] " ).arg( paramValueAsStr, param->type(), paramDefaultValueAsStr );
+        //  title += QStringLiteral( ": %1" ).arg( paramVal );
+
         }
+
+
+
+
+        // QString inputValueStr = inputs.value( params.at( index )->name() ).toString();
+
+        // if ( !inputValueStr.isEmpty() ){
+        //   title += QStringLiteral( "::::: %1" ).arg( inputValueStr );
+        // }
 
 
 
