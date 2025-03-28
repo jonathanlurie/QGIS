@@ -24,6 +24,8 @@
 #include "qgsprocessingmodelcomponent.h"
 #include "qgsprocessingoutputs.h"
 #include "qgsprocessingparameters.h"
+#include "qgsprocessingmodelchildalgorithm.h"
+#include "qgsprocessingalgorithm.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QSvgRenderer>
@@ -186,13 +188,10 @@ void QgsModelDesignerSocketGraphicItem::paint( QPainter *painter, const QStyleOp
 
   QColor outlineColor = getColor();
   QColor fillColor = QColor(outlineColor);
-  fillColor.setAlpha(mHoverState ? 255 : 50 );
-
-
-
+  fillColor.setAlpha(isDefaultParamValue() ? 30 : 255);
 
   // Outline style
-  painter->setPen(QPen(outlineColor, mSocketOutlineWidth));
+  painter->setPen(QPen(outlineColor, mHoverState ? mSocketOutlineWidth * 2 : mSocketOutlineWidth));
 
   // Fill style
   painter->setBrush( QBrush( fillColor, Qt::SolidPattern ) );
@@ -340,6 +339,62 @@ QColor QgsModelDesignerSocketGraphicItem::getColor() {
 
   */
 
+}
+
+
+bool QgsModelDesignerSocketGraphicItem::isDefaultParamValue() {
+  const QgsProcessingModelChildAlgorithm *child = dynamic_cast<const QgsProcessingModelChildAlgorithm *>( mComponent );
+
+  bool isDefaultValue = true;
+
+  // We can only know if the socket should be filled if the algorithm is non null
+  if (child->algorithm()) {
+    switch ( mEdge )
+    {
+      // Input params
+      case Qt::TopEdge:
+      {
+        QgsProcessingParameterDefinitions params = child->algorithm()->parameterDefinitions();
+
+        if ( mIndex > (params.length() - 1) ) {
+          break;
+        }
+
+        const QgsProcessingParameterDefinition* param = params.at( mIndex );
+        QString name = param->name();
+
+        QgsProcessingModelChildParameterSources paramSources = child->parameterSources().value(name);
+        if (paramSources.size() == 0) {
+          break;
+        }
+
+        QVariant paramValue = paramSources[0].staticValue();
+        QVariant paramDefaultValue = param->defaultValue();
+
+        if (paramValue != paramDefaultValue) {
+          isDefaultValue = false;
+        }
+
+        if (paramSources[0].getSourceType() == Qgis::ProcessingModelChildParameterSource::ChildOutput) {
+          isDefaultValue = false;
+        }
+
+        break;
+      }
+
+      // Ouputs
+      case Qt::BottomEdge:
+      {
+
+        break;
+      }
+      case Qt::LeftEdge:
+      case Qt::RightEdge:
+        break;
+    }
+  }
+
+  return isDefaultValue;
 }
 
 ///@endcond

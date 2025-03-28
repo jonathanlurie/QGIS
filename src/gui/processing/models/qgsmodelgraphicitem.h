@@ -195,7 +195,11 @@ class GUI_EXPORT QgsModelDesignerSocketGraphicItem : public QgsModelDesignerFlat
     /** Return the parent GraphicItem (QgsModelComponentGraphicItem) associated to the socket */
     QgsModelComponentGraphicItem *componentItem() { return mComponentItem; };
 
+    /* Returns the color of the socket based on the type of data the param corresponds to */
     QColor getColor();
+
+    /* Returns whether the param value bear the default param value */
+    bool isDefaultParamValue();
   signals:
 
 

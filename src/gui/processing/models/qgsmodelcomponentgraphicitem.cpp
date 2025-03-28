@@ -1169,16 +1169,14 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
 
         const QgsProcessingOutputDefinition *output = child->algorithm()->outputDefinitions().at( index );
         QString name = output->name();
-        QString title = output->description() + "  " + name;
+        QString title = output->description();
 
 
-        if ( outputs.contains( output->name() ) )
-        {
-          title += QStringLiteral( "::: %1" ).arg( outputs.value( output->name() ).toString() );
-        }
+        // if ( outputs.contains( output->name() ) )
+        // {
+        //   title += QStringLiteral( ": %1" ).arg( outputs.value( output->name() ).toString() );
+        // }
 
-        qDebug() << "Title (out):" << title;
-        // return truncatedTextForItem( QString("hello2") );
         return truncatedTextForItem( title );
       }
 
@@ -1205,52 +1203,36 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
         QString title = param->description();
 
 
-        auto paramSources = child->parameterSources().value(name);
+        QgsProcessingModelChildParameterSources paramSources = child->parameterSources().value(name);
         if (paramSources.size() > 0) {
           QVariant paramValue = paramSources[0].staticValue();
           // param->valueAsString(paramValue, );
 
-          QString paramValueAsStr = paramValue.toString();
+          QString paramValueAsStr = QStringLiteral( ": %1" ).arg(paramValue.toString());
           QString paramDefaultValueAsStr = param->defaultValue().toString();
 
-
+          // In case of an enum, we want to display the label of the enum value (and not just its index as an int)
           if (param->type() == QgsProcessingParameterEnum::typeName()) {
-
             const QgsProcessingParameterEnum* paramAsEnumParam = dynamic_cast<const QgsProcessingParameterEnum *>(param);
-            paramValueAsStr = paramAsEnumParam->options().at(paramValue.toInt());
-
+            paramValueAsStr = QStringLiteral( ": %1" ).arg(paramAsEnumParam->options().at(paramValue.toInt()));
             paramDefaultValueAsStr = paramAsEnumParam->options().at(param->defaultValue().toInt());
           }
 
-
-
-
+          // In case of a source (to be plugged) we do not display a value
+          else if (param->type() == QgsProcessingParameterFeatureSource::typeName()) {
+            paramValueAsStr = "";
+          }
 
           // That's exactely the same result as above, but already as a string, which could be inconvenient, in case of enum value lookup
           // QString paramValueBis = paramSources[0].friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()));
 
 
-          title += QStringLiteral( ": %1 (%2) [default: %3] " ).arg( paramValueAsStr, param->type(), paramDefaultValueAsStr );
+          // title += QStringLiteral( ": %1 (%2) [default: %3] " ).arg( paramValueAsStr, param->type(), paramDefaultValueAsStr );
+          title += paramValueAsStr;
+
         //  title += QStringLiteral( ": %1" ).arg( paramVal );
 
         }
-
-
-
-
-        // QString inputValueStr = inputs.value( params.at( index )->name() ).toString();
-
-        // if ( !inputValueStr.isEmpty() ){
-        //   title += QStringLiteral( "::::: %1" ).arg( inputValueStr );
-        // }
-
-
-
-
-
-        // qDebug() << "---- child->parameterSources().value(params.at( index )->name());   "<< child->parameterSources().value(params.at( index )->name());
-
-        qDebug() << "Title (in):" << title;
 
         return truncatedTextForItem( title );
         // return truncatedTextForItem( QString("hello3") );
