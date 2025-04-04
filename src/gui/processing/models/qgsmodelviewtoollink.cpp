@@ -35,8 +35,6 @@ QgsModelViewToolLink::QgsModelViewToolLink( QgsModelGraphicsView *view )
 
   mBezierRubberBand->setBrush( QBrush( QColor( 0, 0, 0, 63 ) ) );
   mBezierRubberBand->setPen( QPen( QBrush( QColor( 0, 0, 0, 100 ) ), 0, Qt::SolidLine ) );
-
-  connect( this, &QgsModelViewToolLink::requestRebuildRequired, scene(), &QgsModelGraphicsScene::rebuildRequired );
 }
 
 void QgsModelViewToolLink::modelMoveEvent( QgsModelViewMouseEvent *event )
@@ -56,7 +54,7 @@ void QgsModelViewToolLink::modelMoveEvent( QgsModelViewMouseEvent *event )
     {
       // snap
       socket->modelHoverEnterEvent( event );
-      QPointF rubberEndPos = socket->mapToScene( socket->getPosition() );
+      QPointF rubberEndPos = socket->mapToScene( socket->position() );
       mBezierRubberBand->update( rubberEndPos, Qt::KeyboardModifiers() );
 
       break;
@@ -146,12 +144,7 @@ void QgsModelViewToolLink::modelReleaseEvent( QgsModelViewMouseEvent *event )
     source = QgsProcessingModelChildParameterSource::fromModelParameter( paramFrom->parameterName() );
   }
 
-  QgsProcessingContext context;
-  QgsProcessingModelerParameterWidget *widget = QgsGui::processingGuiRegistry()->createModelerParameterWidget( view()->modelScene()->model(), childTo->childId(), toParam, context );
-
-
-  QList<QgsProcessingModelChildParameterSource> compatibleParamSources = widget->availableSourcesForChild();
-  delete widget;
+  QList<QgsProcessingModelChildParameterSource> compatibleParamSources = scene()->model()->availableSourcesForChild( childTo->childId(), toParam );
 
   if ( !compatibleParamSources.contains( source ) )
   {
@@ -171,7 +164,7 @@ void QgsModelViewToolLink::modelReleaseEvent( QgsModelViewMouseEvent *event )
 
   view()->endCommand();
   // Redraw
-  emit requestRebuildRequired();
+  scene()->requestRebuildRequired();
 }
 
 bool QgsModelViewToolLink::allowItemInteraction()
@@ -183,7 +176,7 @@ void QgsModelViewToolLink::activate()
 {
   mPreviousViewTool = view()->tool();
 
-  QPointF rubberStartPos = mFromSocket->mapToScene( mFromSocket->getPosition() );
+  QPointF rubberStartPos = mFromSocket->mapToScene( mFromSocket->position() );
   mBezierRubberBand->start( rubberStartPos, Qt::KeyboardModifiers() );
 
   QgsModelViewTool::activate();
@@ -257,7 +250,7 @@ void QgsModelViewToolLink::setFromSocket( QgsModelDesignerSocketGraphicItem *soc
           //We need to pass the update child algorithm to the model
           scene()->model()->setChildAlgorithm( *childFrom );
           // Redraw
-          emit requestRebuildRequired();
+          scene()->requestRebuildRequired();
 
           //Get Socket from Source alg / source parameter
           QgsModelComponentGraphicItem *item = nullptr;

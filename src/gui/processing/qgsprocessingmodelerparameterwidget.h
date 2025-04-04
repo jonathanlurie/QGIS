@@ -43,7 +43,7 @@ class QComboBox;
 /**
  * \class QgsProcessingModelerParameterWidget
  *
- * \brief A widget for customising the value of Processing algorithm parameter inside
+ * \brief A widget for customising the value of Processing algorithm parameters inside
  * a Processing model.
  *
  * The widget provides choice of the linked source for values for the parameter
@@ -107,18 +107,8 @@ class GUI_EXPORT QgsProcessingModelerParameterWidget : public QWidget, public Qg
      * The \a compatibleDataTypes list corresponds to the compatible data types
      * from QgsProcessing::SourceType.
      */
-    void populateSources( const QStringList &compatibleParameterTypes, const QStringList &compatibleOutputTypes, const QList<int> &compatibleDataTypes );
 
-    /**
-     * HACK : Ugly workaround to expose the compatible sources for a parameter definition ( QgsProcessingParameterDefinition)
-     * Idealy we should no rely on any UI-related function to get this
-     * 
-     * see also QgsProcessingModelAlgorithm::availableSourcesForChild
-     *
-     * The available sources are created on widget creation in \see populateSources
-     */
-    QList<QgsProcessingModelChildParameterSource> availableSourcesForChild();
-
+    void populateSources( const QgsProcessingParameterDefinition *param );
 
     /**
      * Set the expected expression format \a text, which is shown in the expression builder dialog for the widget
@@ -245,9 +235,6 @@ class GUI_EXPORT QgsProcessingModelerParameterWidget : public QWidget, public Qg
     QComboBox *mModelInputCombo = nullptr;
     QComboBox *mChildOutputCombo = nullptr;
     QgsFilterLineEdit *mModelOutputName = nullptr;
-
-    QList<QgsProcessingModelChildParameterSource> mSources;
-
 
     QList<Qgis::ProcessingModelChildParameterSource> mLimitedSources;
     friend class TestProcessingGui;

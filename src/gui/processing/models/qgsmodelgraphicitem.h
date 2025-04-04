@@ -73,7 +73,7 @@ class GUI_EXPORT QgsModelDesignerFlatButtonGraphicItem : public QGraphicsObject
     /**
      * Returns the button's position.
      */
-    QPointF getPosition() { return mPosition; };
+    QPointF position() const { return mPosition; };
 
 
     /**
@@ -150,9 +150,9 @@ class GUI_EXPORT QgsModelDesignerFoldButtonGraphicItem : public QgsModelDesigner
 
 /**
  * \ingroup gui
- * \brief A socket allowing linking component together
+ * \brief A socket allowing linking component together.
  * \warning Not stable API
- * \since QGIS 3.42
+ * \since QGIS 3.44
  */
 class GUI_EXPORT QgsModelDesignerSocketGraphicItem : public QgsModelDesignerFlatButtonGraphicItem
 {
@@ -192,7 +192,7 @@ class GUI_EXPORT QgsModelDesignerSocketGraphicItem : public QgsModelDesignerFlat
     /** Return the component associated to the socket */
     QgsProcessingModelComponent *component() { return mComponent; };
 
-    /** Return the parent GraphicItem (QgsModelComponentGraphicItem) associated to the socket */
+    /** Return the parent grapghic item associated to the socket */
     QgsModelComponentGraphicItem *componentItem() { return mComponentItem; };
 
     /* Returns the color of the socket based on the type of data the param corresponds to */

@@ -103,8 +103,9 @@ Q_DECLARE_OPERATORS_FOR_FLAGS( QgsProcessingParametersGenerator::Flags )
 /**
  * \ingroup gui
  * \class QgsProcessingParameterWidgetContext
- * \brief Contains settings which reflect the context in which a Processing parameter widget is shown, e.g., the
- * parent model algorithm, a linked map canvas, and other relevant information which allows the widget
+ * \brief Contains settings which reflect the context in which a Processing parameter widget is shown.
+ *
+ * For instance, the parent model algorithm, a linked map canvas, and other relevant information which allows the widget
  * to fine-tune its behavior.
  *
  * \since QGIS 3.4
@@ -577,54 +578,6 @@ class GUI_EXPORT QgsProcessingParameterWidgetFactoryInterface
 
   protected:
     /**
-     * Returns a list of compatible Processing parameter types for inputs
-     * for this parameter.
-     *
-     * In order to determine the available sources for the parameter in a model
-     * the types returned by this method are checked. The returned list corresponds to the
-     * various available values for QgsProcessingParameterDefinition::type().
-     *
-     * Subclasses should return a list of all QgsProcessingParameterDefinition::type()
-     * values which can be used as input values for the parameter.
-     *
-     * \see compatibleOutputTypes()
-     * \see compatibleDataTypes()
-     */
-    virtual QStringList compatibleParameterTypes() const = 0;
-
-    /**
-     * Returns a list of compatible Processing output types for inputs
-     * for this parameter.
-     *
-     * In order to determine the available sources for the parameter in a model
-     * the types returned by this method are checked. The returned list corresponds to the
-     * various available values for QgsProcessingOutputDefinition::type().
-     *
-     * Subclasses should return a list of all QgsProcessingOutputDefinition::type()
-     * values which can be used as values for the parameter.
-     *
-     * \see compatibleParameterTypes()
-     * \see compatibleDataTypes()
-     */
-    virtual QStringList compatibleOutputTypes() const = 0;
-
-    /**
-     * Returns a list of compatible Processing data types for inputs
-     * for this widget for the specified \a parameter.
-     *
-     * In order to determine the available sources for the parameter in a model
-     * the types returned by this method are checked. The returned list corresponds
-     * to the various available values from QgsProcessing::SourceType.
-     *
-     * Subclasses should return a list of all QgsProcessing::SourceType
-     * values which can be used as values for the parameter.
-     *
-     * \see compatibleParameterTypes()
-     * \see compatibleOutputTypes()
-     */
-    virtual QList<int> compatibleDataTypes( const QgsProcessingParameterDefinition *parameter ) const;
-
-    /**
      * Returns the expected expression format string for expression results for the parameter
      * within model child algorithms.
      *
@@ -646,7 +599,7 @@ class GUI_EXPORT QgsProcessingParameterWidgetFactoryInterface
 /**
  * \class QgsProcessingHiddenWidgetWrapper
  *
- * \brief An widget wrapper for hidden widgets.
+ * \brief A widget wrapper for hidden widgets.
  *
  * The hidden widget wrapper allows for creation of a widget wrapper which does not provide
  * a graphical widget, yet still implements the QgsAbstractProcessingParameterWidgetWrapper
