@@ -368,17 +368,12 @@ bool QgsModelDesignerSocketGraphicItem::isDefaultParamValue() {
           break;
         }
 
-        QVariant paramValue = paramSources[0].staticValue();
-        QVariant paramDefaultValue = param->defaultValue();
-
-        if (paramValue != paramDefaultValue) {
-          isDefaultValue = false;
+        // The default value can only happen in the case of the parameter uses a static value
+        if (paramSources[0].getSourceType() != Qgis::ProcessingModelChildParameterSource::StaticValue) {
+          break;
         }
 
-        if (paramSources[0].getSourceType() == Qgis::ProcessingModelChildParameterSource::ChildOutput) {
-          isDefaultValue = false;
-        }
-
+        isDefaultValue = paramSources[0].staticValue() == param->defaultValue();
         break;
       }
 

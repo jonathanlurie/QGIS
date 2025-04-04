@@ -1256,6 +1256,7 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
           qDebug() << model()->displayName() << " : TOP EDGE";
           qDebug() << "Param name: " << name;
           qDebug() << "Param description: " << title;
+          qDebug() << "Param default value: " << param->defaultValue();
           qDebug() << "Nb sources: " << paramSources.size();
           qDebug() << "Source type: " << firstParamSource.getSourceType();
           qDebug() << "Source outputname(): " << firstParamSource.outputName();
