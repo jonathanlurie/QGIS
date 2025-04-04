@@ -370,6 +370,7 @@ bool QgsModelDesignerSocketGraphicItem::isDefaultParamValue() {
 
         // The default value can only happen in the case of the parameter uses a static value
         if (paramSources[0].getSourceType() != Qgis::ProcessingModelChildParameterSource::StaticValue) {
+          isDefaultValue = false;
           break;
         }
 
