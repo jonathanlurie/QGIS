@@ -159,6 +159,7 @@ QgsModelDesignerFoldButtonGraphicItem::QgsModelDesignerFoldButtonGraphicItem( QG
 
 void QgsModelDesignerFoldButtonGraphicItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
+  qDebug() << "QgsModelDesignerFoldButtonGraphicItem::mousePressEvent";
   mFolded = !mFolded;
   setPicture( mFolded ? mPlusPicture : mMinusPicture );
   emit folded( mFolded );
@@ -167,6 +168,7 @@ void QgsModelDesignerFoldButtonGraphicItem::mousePressEvent( QGraphicsSceneMouse
 
 void QgsModelDesignerFoldButtonGraphicItem::modelPressEvent( QgsModelViewMouseEvent *event )
 {
+  qDebug() << "QgsModelDesignerFoldButtonGraphicItem::modelPressEvent";
   mFolded = !mFolded;
   setPicture( mFolded ? mPlusPicture : mMinusPicture );
   emit folded( mFolded );

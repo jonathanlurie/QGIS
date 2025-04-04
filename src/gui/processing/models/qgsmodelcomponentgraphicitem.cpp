@@ -498,35 +498,75 @@ QPixmap QgsModelComponentGraphicItem::iconPixmap() const
 
 void QgsModelComponentGraphicItem::updateButtonPositions()
 {
+  qDebug() << "DEBUG 100";
+  // DEBUG
+  bool isParameter = dynamic_cast<QgsProcessingModelParameter *>(mComponent.get()) != nullptr;
+  qDebug() << "DEBUG 101" << isParameter;
+
   mEditButton->setPosition( QPointF( itemSize().width() / 2.0 - mButtonSize.width() / 2.0 - BUTTON_MARGIN, itemSize().height() / 2.0 - mButtonSize.height() / 2.0 - BUTTON_MARGIN ) );
   mDeleteButton->setPosition( QPointF( itemSize().width() / 2.0 - mButtonSize.width() / 2.0 - BUTTON_MARGIN, mButtonSize.height() / 2.0 - itemSize().height() / 2.0 + BUTTON_MARGIN ) );
 
-  if ( mExpandTopButton )
-  {
-    const QPointF pt = linkPoint( Qt::TopEdge, -1, true );
-    mExpandTopButton->setPosition( QPointF( 0, pt.y() ) );
-  }
-  if ( mExpandBottomButton )
-  {
-    const QPointF pt = linkPoint( Qt::BottomEdge, -1, false );
-    mExpandBottomButton->setPosition( QPointF( 0, pt.y() ) );
-  }
+  if (isParameter) {
+
+    //   if ( mExpandTopButton )
+    // {
+    //   const QPointF pt = linkPoint( Qt::TopEdge, -1, true );
+    //   mExpandTopButton->setPosition( QPointF( 0, pt.y() ) );
+    // }
+            if ( mExpandBottomButton )
+            {
+              const QPointF pt = linkPoint( Qt::BottomEdge, -1, false );
+              qDebug() << "--- pt: " << pt;
+              mExpandBottomButton->setPosition( QPointF( 0, pt.y() ) );
+            }
+
+    // bool collapsed = mComponent->linksCollapsed( Qt::TopEdge );
+    // for ( QgsModelDesignerSocketGraphicItem *socket : std::as_const( mInSockets ) )
+    // {
+    //   const QPointF pt = linkPoint( Qt::TopEdge, socket->index(), true );
+    //   socket->setPosition( pt );
+    //   socket->setVisible( !collapsed );
+    // }
+
+            bool collapsed = mComponent->linksCollapsed( Qt::BottomEdge );
+            for ( QgsModelDesignerSocketGraphicItem *socket : std::as_const( mOutSockets ) )
+            {
+              const QPointF pt = linkPoint( Qt::BottomEdge, socket->index(), false );
+              qDebug() << "------ pt: " << pt << "     socket: " << socket;
+              socket->setPosition( pt );
+              socket->setVisible( !collapsed );
+            }
+
+  } else {
 
 
-  bool collapsed = mComponent->linksCollapsed( Qt::TopEdge );
-  for ( QgsModelDesignerSocketGraphicItem *socket : std::as_const( mInSockets ) )
-  {
-    const QPointF pt = linkPoint( Qt::TopEdge, socket->index(), true );
-    socket->setPosition( pt );
-    socket->setVisible( !collapsed );
-  }
 
-  collapsed = mComponent->linksCollapsed( Qt::BottomEdge );
-  for ( QgsModelDesignerSocketGraphicItem *socket : std::as_const( mOutSockets ) )
-  {
-    const QPointF pt = linkPoint( Qt::BottomEdge, socket->index(), false );
-    socket->setPosition( pt );
-    socket->setVisible( !collapsed );
+    if ( mExpandTopButton )
+    {
+      const QPointF pt = linkPoint( Qt::TopEdge, -1, true );
+      mExpandTopButton->setPosition( QPointF( 0, pt.y() ) );
+    }
+    if ( mExpandBottomButton )
+    {
+      const QPointF pt = linkPoint( Qt::BottomEdge, -1, false );
+      mExpandBottomButton->setPosition( QPointF( 0, pt.y() ) );
+    }
+
+    bool collapsed = mComponent->linksCollapsed( Qt::TopEdge );
+    for ( QgsModelDesignerSocketGraphicItem *socket : std::as_const( mInSockets ) )
+    {
+      const QPointF pt = linkPoint( Qt::TopEdge, socket->index(), true );
+      socket->setPosition( pt );
+      socket->setVisible( !collapsed );
+    }
+
+    collapsed = mComponent->linksCollapsed( Qt::BottomEdge );
+    for ( QgsModelDesignerSocketGraphicItem *socket : std::as_const( mOutSockets ) )
+    {
+      const QPointF pt = linkPoint( Qt::BottomEdge, socket->index(), false );
+      socket->setPosition( pt );
+      socket->setVisible( !collapsed );
+    }
   }
 }
 
@@ -561,16 +601,37 @@ void QgsModelComponentGraphicItem::fold( Qt::Edge edge, bool folded )
   mComponent->setLinksCollapsed( edge, folded );
   // also need to update the model's stored component
 
+  bool doUpdateButtonPosition = true;
+
   // TODO - this is not so nice, consider moving this to model class
-  if ( QgsProcessingModelChildAlgorithm *child = dynamic_cast<QgsProcessingModelChildAlgorithm *>( mComponent.get() ) )
+  if ( QgsProcessingModelChildAlgorithm *child = dynamic_cast<QgsProcessingModelChildAlgorithm *>( mComponent.get() ) ){
+    qDebug() << ">>> this is QgsProcessingModelChildAlgorithm";
     mModel->childAlgorithm( child->childId() ).setLinksCollapsed( edge, folded );
-  else if ( QgsProcessingModelParameter *param = dynamic_cast<QgsProcessingModelParameter *>( mComponent.get() ) )
-    mModel->parameterComponent( param->parameterName() ).setLinksCollapsed( edge, folded );
-  else if ( QgsProcessingModelOutput *output = dynamic_cast<QgsProcessingModelOutput *>( mComponent.get() ) )
+
+  } else if ( QgsProcessingModelParameter *param = dynamic_cast<QgsProcessingModelParameter *>( mComponent.get() ) ) {
+    qDebug() << ">>> this is QgsProcessingModelParameter";
+    // mModel->parameterComponent( param->parameterName() ).setLinksCollapsed( edge, folded );
+    qDebug() << ">>> DEBUG 01";
+    QString paramName = param->parameterName();
+
+    qDebug() << ">>> DEBUG 02";
+    QgsProcessingModelParameter paramComp = mModel->parameterComponent( paramName );
+
+    qDebug() << ">>> DEBUG 03";
+    paramComp.setLinksCollapsed( edge, folded );
+    qDebug() << ">>> DEBUG 04";
+
+    doUpdateButtonPosition = false;
+  } else if ( QgsProcessingModelOutput *output = dynamic_cast<QgsProcessingModelOutput *>( mComponent.get() ) ){
+    qDebug() << ">>> this is QgsProcessingModelOutput";
     mModel->childAlgorithm( output->childId() ).modelOutput( output->name() ).setLinksCollapsed( edge, folded );
 
+  }
 
-  updateButtonPositions();
+  // DEBUG: For some reason calling this when the component is a parameter cashes QGIS entirely
+  // if (doUpdateButtonPosition) {
+    updateButtonPositions();
+  // }
 
   prepareGeometryChange();
   emit updateArrowPaths();
