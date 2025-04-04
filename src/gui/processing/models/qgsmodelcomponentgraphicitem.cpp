@@ -1204,24 +1204,71 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
 
 
         QgsProcessingModelChildParameterSources paramSources = child->parameterSources().value(name);
+        QString paramValueAsStr = "";
+
         if (paramSources.size() > 0) {
-          QVariant paramValue = paramSources[0].staticValue();
-          // param->valueAsString(paramValue, );
+          QgsProcessingModelChildParameterSource firstParamSource = paramSources[0];
 
-          QString paramValueAsStr = QStringLiteral( ": %1" ).arg(paramValue.toString());
-          QString paramDefaultValueAsStr = param->defaultValue().toString();
+          switch(firstParamSource.getSourceType()) {
 
-          // In case of an enum, we want to display the label of the enum value (and not just its index as an int)
-          if (param->type() == QgsProcessingParameterEnum::typeName()) {
-            const QgsProcessingParameterEnum* paramAsEnumParam = dynamic_cast<const QgsProcessingParameterEnum *>(param);
-            paramValueAsStr = QStringLiteral( ": %1" ).arg(paramAsEnumParam->options().at(paramValue.toInt()));
-            paramDefaultValueAsStr = paramAsEnumParam->options().at(param->defaultValue().toInt());
+            case Qgis::ProcessingModelChildParameterSource::ChildOutput:
+              paramValueAsStr = QStringLiteral( ": %1" ).arg(
+                firstParamSource.friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()))
+              );
+            break;
+
+            case Qgis::ProcessingModelChildParameterSource::Expression:
+              paramValueAsStr = QStringLiteral( ": %1" ).arg(firstParamSource.expression());
+            break;
+
+            case Qgis::ProcessingModelChildParameterSource::ExpressionText:
+              paramValueAsStr = QStringLiteral( ": %1" ).arg(firstParamSource.expressionText());
+            break;
+
+            case Qgis::ProcessingModelChildParameterSource::ModelOutput:
+              paramValueAsStr = QStringLiteral( ": output from '%1'" ).arg(
+                firstParamSource.friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()))
+              );
+            break;
+
+            case Qgis::ProcessingModelChildParameterSource::ModelParameter:
+              paramValueAsStr = QStringLiteral( ": value from '%1'" ).arg(
+                firstParamSource.friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()))
+              );
+            break;
+
+            case Qgis::ProcessingModelChildParameterSource::StaticValue:
+            default:
+              QVariant paramValue = paramSources[0].staticValue();
+              paramValueAsStr = QStringLiteral( ": %1" ).arg(paramValue.toString());
+
+              // QString paramDefaultValueAsStr = param->defaultValue().toString();
+
+              // In case of an enum, we want to display the label of the enum value (and not just its index as an int)
+              if (param->type() == QgsProcessingParameterEnum::typeName()) {
+                const QgsProcessingParameterEnum* paramAsEnumParam = dynamic_cast<const QgsProcessingParameterEnum *>(param);
+                paramValueAsStr = QStringLiteral( ": %1" ).arg(paramAsEnumParam->options().at(paramValue.toInt()));
+                // paramDefaultValueAsStr = paramAsEnumParam->options().at(param->defaultValue().toInt());
+              }
           }
+
+          qDebug() << "===============================================================";
+          qDebug() << model()->displayName() << " : TOP EDGE";
+          qDebug() << "Param name: " << name;
+          qDebug() << "Param description: " << title;
+          qDebug() << "Nb sources: " << paramSources.size();
+          qDebug() << "Source type: " << firstParamSource.getSourceType();
+          qDebug() << "Source outputname(): " << firstParamSource.outputName();
+          qDebug() << "Source expression(): " << firstParamSource.expression();
+          qDebug() << "Source expressionText(): " << firstParamSource.expressionText();
+          qDebug() << "Source staticValue(): " << firstParamSource.staticValue();
+          qDebug() << "Source friendlyIdentifier(): " << firstParamSource.friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()));
+          qDebug() << "===============================================================";
 
           // In case of a source (to be plugged) we do not display a value
-          else if (param->type() == QgsProcessingParameterFeatureSource::typeName()) {
-            paramValueAsStr = "";
-          }
+          // if (param->type() == QgsProcessingParameterFeatureSource::typeName()) {
+          //   paramValueAsStr = "";
+          // }
 
           // That's exactely the same result as above, but already as a string, which could be inconvenient, in case of enum value lookup
           // QString paramValueBis = paramSources[0].friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()));

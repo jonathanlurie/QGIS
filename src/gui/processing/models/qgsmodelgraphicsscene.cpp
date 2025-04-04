@@ -141,24 +141,24 @@ void QgsModelGraphicsScene::createItems( QgsProcessingModelAlgorithm *model, Qgs
     item->setPos( it.value().position().x(), it.value().position().y() );
 
 
-    for (auto paramSourceIt = it.value().parameterSources().constBegin(); paramSourceIt != it.value().parameterSources().constEnd(); ++paramSourceIt)
-    {
+    // for (auto paramSourceIt = it.value().parameterSources().constBegin(); paramSourceIt != it.value().parameterSources().constEnd(); ++paramSourceIt)
+    // {
 
 
-      const QList<QgsProcessingModelChildParameterSource> &sources = paramSourceIt.value();
+    //   const QList<QgsProcessingModelChildParameterSource> &sources = paramSourceIt.value();
 
-      for (const QgsProcessingModelChildParameterSource &source : sources)
-      {
-        source.parameterName();
-        // Process each source here
-        qDebug() << "------------ ::::: Parameter Name:" << source.parameterName() << "   val:" << source.toVariant().toString() << "  val static: " << source.staticValue().toString() << " outputname:" << source.outputName() << "   paramSourceIt.key()" << paramSourceIt.key();
-      }
+    //   for (const QgsProcessingModelChildParameterSource &source : sources)
+    //   {
+    //     source.parameterName();
+    //     // Process each source here
+    //     qDebug() << "------------ ::::: Parameter Name:" << source.parameterName() << "   val:" << source.toVariant().toString() << "  val static: " << source.staticValue().toString() << " outputname:" << source.outputName() << "   paramSourceIt.key()" << paramSourceIt.key() << "   expresion: " << source.expression() << "     expressionTxt:" << source.expressionText();
+    //   }
 
-      qDebug() << "-----";
-    }
+    //   qDebug() << "-----";
+    // }
 
     const QString childId = it.value().childId();
-    qDebug() << "DEBUG01" << childId;
+    // qDebug() << "DEBUG01" << childId;
     item->setResults( mLastResult.childResults().value( childId ) );
     mChildAlgorithmItems.insert( childId, item );
     connect( item, &QgsModelComponentGraphicItem::requestModelRepaint, this, &QgsModelGraphicsScene::rebuildRequired );
@@ -399,15 +399,15 @@ void QgsModelGraphicsScene::setLastRunResult( const QgsProcessingModelResult &re
 
 
 
-  const auto childResults = mLastResult.childResults();
-  for ( auto it = childResults.constBegin(); it != childResults.constEnd(); ++it )
-  {
-    if ( QgsModelChildAlgorithmGraphicItem *item = mChildAlgorithmItems.value( it.key() ) )
-    {
-      qDebug() << "DEBUG02";
-      item->setResults( it.value() );
-    }
-  }
+  // const auto childResults = mLastResult.childResults();
+  // for ( auto it = childResults.constBegin(); it != childResults.constEnd(); ++it )
+  // {
+  //   if ( QgsModelChildAlgorithmGraphicItem *item = mChildAlgorithmItems.value( it.key() ) )
+  //   {
+  //     qDebug() << "DEBUG02";
+  //     item->setResults( it.value() );
+  //   }
+  // }
 }
 
 QList<QgsModelGraphicsScene::LinkSource> QgsModelGraphicsScene::linkSourcesForParameterValue( QgsProcessingModelAlgorithm *model, const QVariant &value, const QString &childId, QgsProcessingContext &context ) const
