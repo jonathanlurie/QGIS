@@ -159,7 +159,6 @@ QgsModelDesignerFoldButtonGraphicItem::QgsModelDesignerFoldButtonGraphicItem( QG
 
 void QgsModelDesignerFoldButtonGraphicItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
-  qDebug() << "QgsModelDesignerFoldButtonGraphicItem::mousePressEvent";
   mFolded = !mFolded;
   setPicture( mFolded ? mPlusPicture : mMinusPicture );
   emit folded( mFolded );
@@ -168,7 +167,6 @@ void QgsModelDesignerFoldButtonGraphicItem::mousePressEvent( QGraphicsSceneMouse
 
 void QgsModelDesignerFoldButtonGraphicItem::modelPressEvent( QgsModelViewMouseEvent *event )
 {
-  qDebug() << "QgsModelDesignerFoldButtonGraphicItem::modelPressEvent";
   mFolded = !mFolded;
   setPicture( mFolded ? mPlusPicture : mMinusPicture );
   emit folded( mFolded );
@@ -215,7 +213,6 @@ void QgsModelDesignerSocketGraphicItem::paint( QPainter *painter, const QStyleOp
 
 QColor QgsModelDesignerSocketGraphicItem::getColor() {
   QString paramDataType = mComponentItem->getLinkedParamDataType(mEdge, mIndex);
-  qDebug() << "______________ paramDataType: " << paramDataType;
 
   // Numerical types
   if(
@@ -334,18 +331,19 @@ QColor QgsModelDesignerSocketGraphicItem::getColor() {
   {
     return QColor(128, 128, 128);
   }
-
-
-  /*
-
-
-  */
-
 }
 
 
 bool QgsModelDesignerSocketGraphicItem::isDefaultParamValue() {
+  if (!mComponent) {
+    return false;
+  }
+
   const QgsProcessingModelChildAlgorithm *child = dynamic_cast<const QgsProcessingModelChildAlgorithm *>( mComponent );
+
+  if (!child) {
+    return false;
+  }
 
   bool isDefaultValue = true;
 

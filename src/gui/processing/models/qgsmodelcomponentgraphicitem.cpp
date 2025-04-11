@@ -498,49 +498,25 @@ QPixmap QgsModelComponentGraphicItem::iconPixmap() const
 
 void QgsModelComponentGraphicItem::updateButtonPositions()
 {
-  qDebug() << "DEBUG 100";
-  // DEBUG
   bool isParameter = dynamic_cast<QgsProcessingModelParameter *>(mComponent.get()) != nullptr;
-  qDebug() << "DEBUG 101" << isParameter;
-
   mEditButton->setPosition( QPointF( itemSize().width() / 2.0 - mButtonSize.width() / 2.0 - BUTTON_MARGIN, itemSize().height() / 2.0 - mButtonSize.height() / 2.0 - BUTTON_MARGIN ) );
   mDeleteButton->setPosition( QPointF( itemSize().width() / 2.0 - mButtonSize.width() / 2.0 - BUTTON_MARGIN, mButtonSize.height() / 2.0 - itemSize().height() / 2.0 + BUTTON_MARGIN ) );
 
   if (isParameter) {
+    if ( mExpandBottomButton )
+    {
+      const QPointF pt = linkPoint( Qt::BottomEdge, -1, false );
+      mExpandBottomButton->setPosition( QPointF( 0, pt.y() ) );
+    }
 
-    //   if ( mExpandTopButton )
-    // {
-    //   const QPointF pt = linkPoint( Qt::TopEdge, -1, true );
-    //   mExpandTopButton->setPosition( QPointF( 0, pt.y() ) );
-    // }
-            if ( mExpandBottomButton )
-            {
-              const QPointF pt = linkPoint( Qt::BottomEdge, -1, false );
-              qDebug() << "--- pt: " << pt;
-              mExpandBottomButton->setPosition( QPointF( 0, pt.y() ) );
-            }
-
-    // bool collapsed = mComponent->linksCollapsed( Qt::TopEdge );
-    // for ( QgsModelDesignerSocketGraphicItem *socket : std::as_const( mInSockets ) )
-    // {
-    //   const QPointF pt = linkPoint( Qt::TopEdge, socket->index(), true );
-    //   socket->setPosition( pt );
-    //   socket->setVisible( !collapsed );
-    // }
-
-            bool collapsed = mComponent->linksCollapsed( Qt::BottomEdge );
-            for ( QgsModelDesignerSocketGraphicItem *socket : std::as_const( mOutSockets ) )
-            {
-              const QPointF pt = linkPoint( Qt::BottomEdge, socket->index(), false );
-              qDebug() << "------ pt: " << pt << "     socket: " << socket;
-              socket->setPosition( pt );
-              socket->setVisible( !collapsed );
-            }
-
+    bool collapsed = mComponent->linksCollapsed( Qt::BottomEdge );
+    for ( QgsModelDesignerSocketGraphicItem *socket : std::as_const( mOutSockets ) )
+    {
+      const QPointF pt = linkPoint( Qt::BottomEdge, socket->index(), false );
+      socket->setPosition( pt );
+      socket->setVisible( !collapsed );
+    }
   } else {
-
-
-
     if ( mExpandTopButton )
     {
       const QPointF pt = linkPoint( Qt::TopEdge, -1, true );
@@ -601,38 +577,18 @@ void QgsModelComponentGraphicItem::fold( Qt::Edge edge, bool folded )
   mComponent->setLinksCollapsed( edge, folded );
   // also need to update the model's stored component
 
-  bool doUpdateButtonPosition = true;
-
   // TODO - this is not so nice, consider moving this to model class
   if ( QgsProcessingModelChildAlgorithm *child = dynamic_cast<QgsProcessingModelChildAlgorithm *>( mComponent.get() ) ){
-    qDebug() << ">>> this is QgsProcessingModelChildAlgorithm";
     mModel->childAlgorithm( child->childId() ).setLinksCollapsed( edge, folded );
-
   } else if ( QgsProcessingModelParameter *param = dynamic_cast<QgsProcessingModelParameter *>( mComponent.get() ) ) {
-    qDebug() << ">>> this is QgsProcessingModelParameter";
-    // mModel->parameterComponent( param->parameterName() ).setLinksCollapsed( edge, folded );
-    qDebug() << ">>> DEBUG 01";
     QString paramName = param->parameterName();
-
-    qDebug() << ">>> DEBUG 02";
     QgsProcessingModelParameter paramComp = mModel->parameterComponent( paramName );
-
-    qDebug() << ">>> DEBUG 03";
     paramComp.setLinksCollapsed( edge, folded );
-    qDebug() << ">>> DEBUG 04";
-
-    doUpdateButtonPosition = false;
   } else if ( QgsProcessingModelOutput *output = dynamic_cast<QgsProcessingModelOutput *>( mComponent.get() ) ){
-    qDebug() << ">>> this is QgsProcessingModelOutput";
     mModel->childAlgorithm( output->childId() ).modelOutput( output->name() ).setLinksCollapsed( edge, folded );
-
   }
 
-  // DEBUG: For some reason calling this when the component is a parameter cashes QGIS entirely
-  // if (doUpdateButtonPosition) {
-    updateButtonPositions();
-  // }
-
+  updateButtonPositions();
   prepareGeometryChange();
   emit updateArrowPaths();
   emit changed();
@@ -684,8 +640,6 @@ QPointF QgsModelComponentGraphicItem::linkPoint( Qt::Edge edge, int index, bool 
           offsetX = 17;
         }
         const int pointIndex = !mComponent->linksCollapsed( Qt::BottomEdge ) ? index : -1;
-
-        // const QString text = truncatedTextForItem( QString("hello") );
         const QString text = truncatedTextForItem( linkPointText( Qt::BottomEdge, index ) );
         const QFontMetricsF fm( mFont );
         const double w = fm.boundingRect( text ).width();
@@ -1132,9 +1086,6 @@ int QgsModelChildAlgorithmGraphicItem::linkPointCount( Qt::Edge edge ) const
     {
       case Qt::BottomEdge:
       {
-        auto a = child->algorithm()->outputDefinitions();
-        auto b = a.at(0);
-        b->type();
         return child->algorithm()->outputDefinitions().size();
       }
       case Qt::TopEdge:
@@ -1211,9 +1162,6 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
     const QVariantMap inputs = mResults.inputs();
     const QVariantMap outputs = mResults.outputs();
 
-    qDebug() << "inputs.size():" << inputs.size();
-
-
     switch ( edge )
     {
       case Qt::BottomEdge:
@@ -1229,15 +1177,7 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
         }
 
         const QgsProcessingOutputDefinition *output = child->algorithm()->outputDefinitions().at( index );
-        QString name = output->name();
         QString title = output->description();
-
-
-        // if ( outputs.contains( output->name() ) )
-        // {
-        //   title += QStringLiteral( ": %1" ).arg( outputs.value( output->name() ).toString() );
-        // }
-
         return truncatedTextForItem( title );
       }
 
@@ -1303,48 +1243,16 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
               QVariant paramValue = paramSources[0].staticValue();
               paramValueAsStr = QStringLiteral( ": %1" ).arg(paramValue.toString());
 
-              // QString paramDefaultValueAsStr = param->defaultValue().toString();
-
               // In case of an enum, we want to display the label of the enum value (and not just its index as an int)
               if (param->type() == QgsProcessingParameterEnum::typeName()) {
                 const QgsProcessingParameterEnum* paramAsEnumParam = dynamic_cast<const QgsProcessingParameterEnum *>(param);
                 paramValueAsStr = QStringLiteral( ": %1" ).arg(paramAsEnumParam->options().at(paramValue.toInt()));
-                // paramDefaultValueAsStr = paramAsEnumParam->options().at(param->defaultValue().toInt());
               }
           }
-
-          qDebug() << "===============================================================";
-          qDebug() << model()->displayName() << " : TOP EDGE";
-          qDebug() << "Param name: " << name;
-          qDebug() << "Param description: " << title;
-          qDebug() << "Param default value: " << param->defaultValue();
-          qDebug() << "Nb sources: " << paramSources.size();
-          qDebug() << "Source type: " << firstParamSource.getSourceType();
-          qDebug() << "Source outputname(): " << firstParamSource.outputName();
-          qDebug() << "Source expression(): " << firstParamSource.expression();
-          qDebug() << "Source expressionText(): " << firstParamSource.expressionText();
-          qDebug() << "Source staticValue(): " << firstParamSource.staticValue();
-          qDebug() << "Source friendlyIdentifier(): " << firstParamSource.friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()));
-          qDebug() << "===============================================================";
-
-          // In case of a source (to be plugged) we do not display a value
-          // if (param->type() == QgsProcessingParameterFeatureSource::typeName()) {
-          //   paramValueAsStr = "";
-          // }
-
-          // That's exactely the same result as above, but already as a string, which could be inconvenient, in case of enum value lookup
-          // QString paramValueBis = paramSources[0].friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()));
-
-
-          // title += QStringLiteral( ": %1 (%2) [default: %3] " ).arg( paramValueAsStr, param->type(), paramDefaultValueAsStr );
           title += paramValueAsStr;
-
-        //  title += QStringLiteral( ": %1" ).arg( paramVal );
-
         }
 
         return truncatedTextForItem( title );
-        // return truncatedTextForItem( QString("hello3") );
       }
 
       case Qt::LeftEdge:
@@ -1375,9 +1283,6 @@ bool QgsModelChildAlgorithmGraphicItem::canDeleteComponent()
 
 void QgsModelChildAlgorithmGraphicItem::setResults( const QgsProcessingModelChildAlgorithmResult &results)
 {
-
-  qDebug() << "------- setResults " ;
-
   if ( mResults == results )
     return;
 
