@@ -1085,9 +1085,7 @@ int QgsModelChildAlgorithmGraphicItem::linkPointCount( Qt::Edge edge ) const
     switch ( edge )
     {
       case Qt::BottomEdge:
-      {
         return child->algorithm()->outputDefinitions().size();
-      }
       case Qt::TopEdge:
       {
         QgsProcessingParameterDefinitions params = child->algorithm()->parameterDefinitions();
@@ -1095,7 +1093,6 @@ int QgsModelChildAlgorithmGraphicItem::linkPointCount( Qt::Edge edge ) const
                         return param->flags() & Qgis::ProcessingParameterFlag::Hidden || param->isDestination();
                       } ),
                       params.end() );
-
         return params.size();
       }
 
