@@ -192,7 +192,7 @@ class GUI_EXPORT QgsModelDesignerSocketGraphicItem : public QgsModelDesignerFlat
     /** Return the component associated to the socket */
     QgsProcessingModelComponent *component() { return mComponent; };
 
-    /** Return the parent grapghic item associated to the socket */
+    /** Return the parent graphic item associated to the socket */
     QgsModelComponentGraphicItem *componentItem() { return mComponentItem; };
 
     /* Returns the color of the socket based on the type of data the param corresponds to */
