@@ -1204,47 +1204,65 @@ QString QgsModelChildAlgorithmGraphicItem::linkPointText( Qt::Edge edge, int ind
         QgsProcessingModelChildParameterSources paramSources = child->parameterSources().value(name);
         QString paramValueAsStr = "";
 
+        qDebug() << "paramSources:  " << paramSources.size();
+
         if (paramSources.size() > 0) {
           QgsProcessingModelChildParameterSource firstParamSource = paramSources[0];
 
           switch(firstParamSource.getSourceType()) {
 
             case Qgis::ProcessingModelChildParameterSource::ChildOutput:
+              qDebug() << "DEBUG 2";
               paramValueAsStr = QStringLiteral( ": %1" ).arg(
                 firstParamSource.friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()))
               );
+              qDebug() << "DEBUG 3";
             break;
 
             case Qgis::ProcessingModelChildParameterSource::Expression:
+              qDebug() << "DEBUG 4";
               paramValueAsStr = QStringLiteral( ": %1" ).arg(firstParamSource.expression());
+              qDebug() << "DEBUG 5";
             break;
 
             case Qgis::ProcessingModelChildParameterSource::ExpressionText:
+              qDebug() << "DEBUG 6";
               paramValueAsStr = QStringLiteral( ": %1" ).arg(firstParamSource.expressionText());
+              qDebug() << "DEBUG 7";
             break;
 
             case Qgis::ProcessingModelChildParameterSource::ModelOutput:
+              qDebug() << "DEBUG 8";
               paramValueAsStr = QStringLiteral( ": output from '%1'" ).arg(
                 firstParamSource.friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()))
               );
+              qDebug() << "DEBUG 9";
             break;
 
             case Qgis::ProcessingModelChildParameterSource::ModelParameter:
-              paramValueAsStr = QStringLiteral( ": value from '%1'" ).arg(
-                firstParamSource.friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()))
-              );
+            {
+              qDebug() << "DEBUG 10";
+              QString friendlyName = firstParamSource.friendlyIdentifier(const_cast<QgsProcessingModelAlgorithm *>(model()));
+              paramValueAsStr = friendlyName.isEmpty() ? QStringLiteral( ": <MISSING INPUT>" ) : QStringLiteral( ": value from '%1'" ).arg(friendlyName);
+              qDebug() << "DEBUG 11";
             break;
+            }
 
             case Qgis::ProcessingModelChildParameterSource::StaticValue:
+            qDebug() << "DEBUG 12";
             default:
+              qDebug() << "DEBUG 13";
               QVariant paramValue = paramSources[0].staticValue();
+              qDebug() << "DEBUG 14";
               paramValueAsStr = QStringLiteral( ": %1" ).arg(paramValue.toString());
+              qDebug() << "DEBUG 15";
 
               // In case of an enum, we want to display the label of the enum value (and not just its index as an int)
               if (param->type() == QgsProcessingParameterEnum::typeName()) {
                 const QgsProcessingParameterEnum* paramAsEnumParam = dynamic_cast<const QgsProcessingParameterEnum *>(param);
                 paramValueAsStr = QStringLiteral( ": %1" ).arg(paramAsEnumParam->options().at(paramValue.toInt()));
               }
+              qDebug() << "DEBUG 16";
           }
           title += paramValueAsStr;
         }
