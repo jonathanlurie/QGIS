@@ -866,6 +866,28 @@ QString QgsModelParameterGraphicItem::linkPointText( Qt::Edge, int index ) const
   return QString();
 }
 
+
+
+QString QgsModelParameterGraphicItem::getLinkedParamDataType(Qt::Edge edge, int index)
+{
+  QString unknownType = QString("unknown");
+
+  if ( index < 0 )
+  {
+    return unknownType;
+  }
+
+
+  if ( const QgsProcessingModelParameter *parameter = dynamic_cast< const QgsProcessingModelParameter * >( component() ) )
+  {
+    qDebug() << "PARAM name: " << this->model()->parameterDefinition( parameter->parameterName() )->name() << "     TYPE: " << this->model()->parameterDefinition( parameter->parameterName() )->type();
+    return this->model()->parameterDefinition( parameter->parameterName() )->type();
+  }
+
+  return unknownType;
+}
+
+
 void QgsModelParameterGraphicItem::updateStoredComponentPosition( const QPointF &pos, const QSizeF &size )
 {
   if ( QgsProcessingModelParameter *param = dynamic_cast<QgsProcessingModelParameter *>( component() ) )
@@ -1109,7 +1131,7 @@ QString QgsModelComponentGraphicItem::getLinkedParamDataType(Qt::Edge edge, int 
 {
   QString unknownType = QString("unknown");
 
-if ( const QgsProcessingModelChildAlgorithm *child = dynamic_cast<const QgsProcessingModelChildAlgorithm *>( component() ) )
+  if ( const QgsProcessingModelChildAlgorithm *child = dynamic_cast<const QgsProcessingModelChildAlgorithm *>( component() ) )
   {
     if ( !child->algorithm() ) {
       return unknownType;

@@ -428,6 +428,8 @@ class GUI_EXPORT QgsModelParameterGraphicItem : public QgsModelComponentGraphicI
     void contextMenuEvent( QGraphicsSceneContextMenuEvent *event ) override;
     bool canDeleteComponent() override;
 
+    QString getLinkedParamDataType( Qt::Edge edge, int index );
+
   protected:
     QColor fillColor( State state ) const override;
     QColor strokeColor( State state ) const override;

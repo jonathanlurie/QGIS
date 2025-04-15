@@ -212,18 +212,36 @@ void QgsModelDesignerSocketGraphicItem::paint( QPainter *painter, const QStyleOp
 
 
 QColor QgsModelDesignerSocketGraphicItem::getColor() {
-  QString paramDataType = mComponentItem->getLinkedParamDataType(mEdge, mIndex);
+  QString dataType;
+
+  // Possibly, the mComponentItem is an instance of QgsModelParameterGraphicItem. In this case,
+  // it needs to be explicitely casted so that the relevant getLinkedParamDataType method is being called
+  if (QgsModelParameterGraphicItem *paramItem = dynamic_cast<QgsModelParameterGraphicItem *>(componentItem()))
+  {
+     dataType = paramItem->getLinkedParamDataType(mEdge, mIndex);
+  }
+  else
+  {
+    dataType = componentItem()->getLinkedParamDataType(mEdge, mIndex);
+  }
+
+  return QgsModelDesignerSocketGraphicItem::typeToColorLookup(dataType);
+
+}
+
+
+QColor QgsModelDesignerSocketGraphicItem::typeToColorLookup(QString dataType) {
 
   // Numerical types
   if(
-      paramDataType == QgsProcessingParameterMatrix::typeName() ||
-      paramDataType == QgsProcessingParameterNumber::typeName() ||
-      paramDataType == QgsProcessingParameterRange::typeName() ||
-      paramDataType == QgsProcessingParameterColor::typeName() ||
-      paramDataType == QgsProcessingOutputNumber::typeName() ||
-      paramDataType == QgsProcessingParameterDistance::typeName() ||
-      paramDataType == QgsProcessingParameterDuration::typeName() ||
-      paramDataType == QgsProcessingParameterScale::typeName()
+      dataType == QgsProcessingParameterMatrix::typeName() ||
+      dataType == QgsProcessingParameterNumber::typeName() ||
+      dataType == QgsProcessingParameterRange::typeName() ||
+      dataType == QgsProcessingParameterColor::typeName() ||
+      dataType == QgsProcessingOutputNumber::typeName() ||
+      dataType == QgsProcessingParameterDistance::typeName() ||
+      dataType == QgsProcessingParameterDuration::typeName() ||
+      dataType == QgsProcessingParameterScale::typeName()
 
     ) {
     return QColor(34, 157, 214);
@@ -231,36 +249,35 @@ QColor QgsModelDesignerSocketGraphicItem::getColor() {
 
   // Boolean type
   if(
-    paramDataType == QgsProcessingParameterBoolean::typeName() ||
-    paramDataType == QgsProcessingOutputBoolean::typeName()
+    dataType == QgsProcessingParameterBoolean::typeName() ||
+    dataType == QgsProcessingOutputBoolean::typeName()
   ) {
     return QColor(51, 201, 28);
   } else
 
-
   // Vector types
   if(
-      paramDataType == QgsProcessingParameterPoint::typeName() ||
-      paramDataType == QgsProcessingParameterGeometry::typeName() ||
-      paramDataType == QgsProcessingParameterVectorLayer::typeName() ||
-      paramDataType == QgsProcessingParameterMeshLayer::typeName() ||
-      paramDataType == QgsProcessingParameterPointCloudLayer::typeName() ||
-      paramDataType == QgsProcessingOutputVectorLayer::typeName() ||
-      paramDataType == QgsProcessingOutputPointCloudLayer::typeName() ||
-      paramDataType == QgsProcessingParameterExtent::typeName() ||
-      paramDataType == QgsProcessingOutputVectorTileLayer::typeName() ||
-      paramDataType == QgsProcessingParameterPointCloudDestination::typeName() ||
-      paramDataType == QgsProcessingParameterVectorTileDestination::typeName() ||
-      paramDataType == QgsProcessingParameterVectorDestination::typeName() ||
-      paramDataType == QgsProcessingParameterFeatureSource::typeName()
+      dataType == QgsProcessingParameterPoint::typeName() ||
+      dataType == QgsProcessingParameterGeometry::typeName() ||
+      dataType == QgsProcessingParameterVectorLayer::typeName() ||
+      dataType == QgsProcessingParameterMeshLayer::typeName() ||
+      dataType == QgsProcessingParameterPointCloudLayer::typeName() ||
+      dataType == QgsProcessingOutputVectorLayer::typeName() ||
+      dataType == QgsProcessingOutputPointCloudLayer::typeName() ||
+      dataType == QgsProcessingParameterExtent::typeName() ||
+      dataType == QgsProcessingOutputVectorTileLayer::typeName() ||
+      dataType == QgsProcessingParameterPointCloudDestination::typeName() ||
+      dataType == QgsProcessingParameterVectorTileDestination::typeName() ||
+      dataType == QgsProcessingParameterVectorDestination::typeName() ||
+      dataType == QgsProcessingParameterFeatureSource::typeName()
   ) {
     return QColor(180, 180, 0);
   } else
 
   // Raster type
   if(
-    paramDataType == QgsProcessingParameterRasterLayer::typeName() ||
-    paramDataType == QgsProcessingOutputRasterLayer::typeName()
+    dataType == QgsProcessingParameterRasterLayer::typeName() ||
+    dataType == QgsProcessingOutputRasterLayer::typeName()
 
   ) {
     return QColor(0, 180, 180);
@@ -268,18 +285,18 @@ QColor QgsModelDesignerSocketGraphicItem::getColor() {
 
   // enum
   if(
-    paramDataType == QgsProcessingParameterEnum::typeName()
+    dataType == QgsProcessingParameterEnum::typeName()
   ) {
     return QColor(128, 68, 201);
   } else
 
   // String and datetime types
   if(
-    paramDataType == QgsProcessingParameterString::typeName() ||
-    paramDataType == QgsProcessingParameterDateTime::typeName() ||
-    paramDataType == QgsProcessingParameterCrs::typeName() ||
-    paramDataType == QgsProcessingOutputHtml::typeName() ||
-    paramDataType == QgsProcessingOutputString::typeName()
+    dataType == QgsProcessingParameterString::typeName() ||
+    dataType == QgsProcessingParameterDateTime::typeName() ||
+    dataType == QgsProcessingParameterCrs::typeName() ||
+    dataType == QgsProcessingOutputHtml::typeName() ||
+    dataType == QgsProcessingOutputString::typeName()
 
   ) {
     return QColor(100, 100, 255);
@@ -287,28 +304,28 @@ QColor QgsModelDesignerSocketGraphicItem::getColor() {
 
   // filesystem types
   if(
-    paramDataType == QgsProcessingParameterFile::typeName() ||
-    paramDataType == QgsProcessingOutputFolder::typeName() ||
-    paramDataType == QgsProcessingOutputFile::typeName() ||
-    paramDataType == QgsProcessingParameterFolderDestination::typeName() ||
-    paramDataType == QgsProcessingParameterFeatureSink::typeName() ||
-    paramDataType == QgsProcessingParameterRasterDestination::typeName() ||
-    paramDataType == QgsProcessingParameterFileDestination::typeName()
+    dataType == QgsProcessingParameterFile::typeName() ||
+    dataType == QgsProcessingOutputFolder::typeName() ||
+    dataType == QgsProcessingOutputFile::typeName() ||
+    dataType == QgsProcessingParameterFolderDestination::typeName() ||
+    dataType == QgsProcessingParameterFeatureSink::typeName() ||
+    dataType == QgsProcessingParameterRasterDestination::typeName() ||
+    dataType == QgsProcessingParameterFileDestination::typeName()
   ) {
     return QColor(80, 80, 80);
   } else
 
   // Expression type
-  if(paramDataType == QgsProcessingParameterExpression::typeName()) {
+  if(dataType == QgsProcessingParameterExpression::typeName()) {
     return QColor(180, 80, 180);
   } else
 
   // Other Layer types
   if(
-    paramDataType == QgsProcessingParameterMultipleLayers::typeName() ||
-    paramDataType == QgsProcessingParameterMapLayer::typeName() ||
-    paramDataType == QgsProcessingParameterAnnotationLayer::typeName() ||
-    paramDataType == QgsProcessingOutputMultipleLayers::typeName()
+    dataType == QgsProcessingParameterMultipleLayers::typeName() ||
+    dataType == QgsProcessingParameterMapLayer::typeName() ||
+    dataType == QgsProcessingParameterAnnotationLayer::typeName() ||
+    dataType == QgsProcessingOutputMultipleLayers::typeName()
 
   ) {
     return QColor(128, 128, 0);
